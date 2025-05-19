@@ -1,0 +1,40 @@
+Memory Managemnt in C++ : new vs new[]
+
+🔹 `new` – Single Object Allocation
+
+1. *Allocates raw memory* on the heap for the object (`sizeof(T)` bytes).
+2. *Calls the constructor* of the object at the allocated location.
+3. *Does not store metadata* because it’s a single object.
+4. When `delete` is called:
+
+   * Calls the destructor of the object.
+   * Frees the memory.
+   * No need for metadata since the type is known at compile-time.
+
+🔹 `new[]` – Array Allocation
+
+1. *Allocates memory for:*
+
+   * All `n` objects: `sizeof(T) * n` bytes.
+   * Extra metadata: usually stored just before the array's base address (exact details are implementation-dependent).
+2. *Loops through the array*:
+
+   * Calls the constructor for each object.
+   * If an exception occurs mid-way, destructors are called for already-constructed objects.
+3. Metadata (like number of elements) is saved to help `delete[]` later.
+
+### When `delete[]` is called:
+
+* Reads the metadata to know how many destructors to call.
+* Calls destructors in reverse order.
+* Frees the entire memory block.
+
+ 🧠 Summary Difference:
+
+| Aspect       | `new`        | `new[]`                         |
+| ------------ | ------------ | ------------------------------- |
+| Memory       | For 1 object | For n objects + metadata        |
+| Constructor  | Called once  | Called in a loop                |
+| Metadata     | Not stored   | Stored internally               |
+| Destructor   | Called once  | Called in loop (using metadata) |
+| Deallocation | `delete`     | `delete[]`                      |

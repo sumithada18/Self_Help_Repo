@@ -1,0 +1,122 @@
+Placement New - Revision Notes
+==================================
+
+🔹 What is Placement New?
+--------------------------
+- It's a variation of the 'new' operator that constructs an object at a specific memory location.
+- Syntax: new (address) Type(args);
+
+🔹 Why Use Placement New?
+--------------------------
+- Gives full control over *where* an object is created.
+- Avoids dynamic heap allocation (malloc/new).
+- Helps in custom memory management.
+
+🔹 Real-world Use Cases
+------------------------
+1. **Memory pools / custom allocators**
+   - Pre-allocate big memory blocks and construct objects inside them.
+   - Improves performance, avoids heap fragmentation.
+
+2. **Shared or mapped memory**
+   - Construct object directly in memory-mapped files or shared memory (like in IPC).
+
+3. **Low-level systems / Embedded**
+   - Where heap usage is restricted or expensive.
+
+🔹 When to Use?
+----------------
+- When performance or memory layout control is critical.
+- In systems programming or high-performance computing.
+
+🔹 Benefits
+------------
+- No heap allocation overhead.
+- Full control over object placement.
+- Can avoid memory fragmentation.
+
+🔹 Gotchas / Warnings
+----------------------
+- Manual destructor call is needed (no delete).
+- Cannot use delete on placement new object.
+- Must manage memory lifecycle manually.
+
+🔹 Code Example (From GeeksForGeeks)
+-------------------------------------
+```cpp
+#include<iostream>
+#include<cstdlib>
+#include<cmath>
+using namespace std;
+
+class Complex {
+    double re_, im_;
+public:
+    Complex(double re = 0, double im = 0): re_(re), im_(im) {
+        cout << "Constructor : (" << re_ << ", " << im_ << ")" << endl;
+    }
+    ~Complex() {
+        cout << "Destructor : (" << re_ << ", " << im_ << ")" << endl;
+    }
+    double normal() {
+        return sqrt(re_ * re_ + im_ * im_);
+    }
+    void print() {
+        cout << "|" << re_ <<" +j" << im_ << " | = " << normal() << endl;
+    }
+};
+
+int main() {
+    unsigned char buf[100]; // buffer on stack
+
+    Complex* pc = new Complex(4.2, 5.3);
+    Complex* pd = new Complex[2]; // default-initialized
+
+    Complex *pe = new (buf) Complex(2.6, 3.9); // placement new
+
+    pc->print();
+    pd[0].print();
+    pd[1].print();
+    pe->print();
+
+    delete pc;
+    delete[] pd;
+    pe->~Complex(); // manual destructor call
+}
+```
+
+🔹 Another Mini Example
+------------------------
+```
+// C++ program to illustrate segmentation fault
+// while using placement new operator
+#include<iostream>
+using namespace std;
+
+int main()
+{
+    // Fine
+    int i = 10;
+    int *ipt = &i ;
+    int *i1 = new(ipt) int(9) ;
+
+    // Incorrect as ip may not
+    // be a valid address
+    int *ip;
+    int *i2 = new(ip) int(4) ;
+
+    // Fine
+    void *vd = &i;
+    int *i3 = new(vd) int(34) ;
+
+    // Incorrect as x is not an address
+    int x;
+    int *i5 = new(x) int(3) ;
+
+    return 0;
+}
+```
+
+📝 Summary
+-----------
+> Placement new is a low-level, powerful feature used for performance, memory layout control, and system-level programming. Use it wisely and never forget to manually destroy the object.

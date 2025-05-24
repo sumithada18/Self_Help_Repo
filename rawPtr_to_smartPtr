@@ -1,0 +1,50 @@
+#include <iostream>
+#include <memory>
+
+// Dummy class for demonstration
+struct Widget {
+    Widget() { std::cout << "Widget created\n"; }
+    ~Widget() { std::cout << "Widget destroyed\n"; }
+    void use() { std::cout << "Widget used\n"; }
+};
+
+// --- Snippet Start ---
+Widget* raw_w_ptr = new Widget(); // 1. Raw pointer created
+
+{ // Inner scope for smart pointer lifetime
+    std::unique_ptr<Widget> smart_w_ptr(raw_w_ptr); // 2. Smart pointer takes ownership
+    std::cout << "Smart pointer in scope, managing Widget.\n";
+    // smart_w_ptr->use(); // Safe to use via smart pointer here
+} // 3. smart_w_ptr goes out of scope, Widget is destroyed
+
+// 4. raw_w_ptr is now a dangling pointer!
+// raw_w_ptr->use(); // UNDEFINED BEHAVIOR: Accessing deallocated memory
+
+/*
+ *  PROBLEM: DANGLING RAW POINTER
+ *  - `raw_w_ptr` still holds the memory address of the `Widget`.
+ *  - However, `smart_w_ptr` destroyed the `Widget` object when it went out of scope.
+ *  - Using `raw_w_ptr` after this point leads to undefined behavior.
+ *
+ *  BEST PRACTICES:
+ *  - Avoid using the original raw pointer variable after a smart pointer takes ownership.
+ *  - Prefer `std::make_unique` or `std::make_shared` to create the object and smart pointer in one step,
+ *    avoiding a separate, potentially dangling, raw pointer variable.
+ *    (e.g., `auto smart_w_ptr = std::make_unique<Widget>();`)
+ *  - If you must create a raw pointer first, consider setting it to `nullptr` immediately
+ *    after transferring ownership to make accidental misuse less likely.
+ *    (e.g., `smart_w_ptr(raw_w_ptr); raw_w_ptr = nullptr;`)
+ */
+// --- Snippet End ---
+
+// To make this runnable for testing, you'd add a main function,
+// but the snippet above focuses on the problematic part.
+/*
+int main() {
+    // (Code from snippet would go here to observe the output)
+    std::cout << "After smart pointer scope.\n";
+    // If you uncomment raw_w_ptr->use(); above, program will likely crash or misbehave.
+    // delete raw_w_ptr; // THIS WOULD BE A DOUBLE DELETE ERROR if smart_w_ptr existed!
+    return 0;
+}
+*/

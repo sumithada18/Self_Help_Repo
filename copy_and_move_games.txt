@@ -32,3 +32,50 @@
   for which a "default" member-wise move is just a copy of the handle's value, not a transfer of ownership that includes nullifying the source's handle.
 ○ The statement is false if all members are already self-managing (like std::string) or simple types, where their own move operations (or the nature of moving them) are 
   already correct.
+
+
+=========================================================================================
+    Move Constructor with std::string (Shallow vs Deep Move)
+=========================================================================================
+code:
+#include <iostream>
+#include <string>
+
+class Test{
+    public:
+    std::string str;
+    Test(std::string arg) : str(arg) {
+        std::cout << "cons.. called\n";
+    }
+    // move constructor but copying
+    // Test(Test&& other) : str(other.str){
+    // }
+    // actual move constructor
+    Test(Test&& other) : str(std::move(other.str)){
+        
+    }
+};
+
+int main()
+{
+    Test t1("sumit");
+    Test t2(std::move(t1));
+    
+    std::cout << "t2's str: " << t2.str << "\n";
+    if(!t1.str.empty()){
+    std::cout << t1.str << "\n";
+    }
+    else{
+        std::cout << "t1's str is null\n";
+    }
+    return 0;
+}
+
+understanding:
+When we do str(other.str), the expression other.str is an lvalue, so it invokes the copy constructor of std::string, copying the contents from other.str into str.
+
+To move the contents instead, we use str(std::move(other.str)). Here, std::move casts other.str into an rvalue, triggering the move constructor of std::string. This transfers the internal resources (like heap-allocated memory) from other.str to str, leaving other.str in a valid but unspecified state.
+
+This distinction matters because std::string, std::vector, and similar types are wrappers around raw data. We can’t "manually" move internal resources — instead, we rely on their move constructors, which are designed to efficiently transfer ownership of dynamic memory or internal buffers.
+
+So, we don’t move the containers directly — we request them to move their contents by explicitly invoking their move constructors using std::move.

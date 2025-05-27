@@ -1,0 +1,17 @@
+1.  For class members that are simple data types (like int, char, double) or C-style arrays, and structs/classes that don't manage external resources 
+    (no raw pointers to heap memory they own), "moving" them is effectively the same as copying their value. std::move on the containing object casts 
+    it to an rvalue reference, potentially enabling its move constructor. If a move constructor is indeed invoked for the containing object, its operation
+    on these simple members will effectively be a bit-wise copy; this is because such members lack external resources to 'pilfer', so the compiler 
+    correctly implements their 'move' as a value copy. A compiler-generated copy operation for these members also performs a member-wise copy.
+
+2.  If a class directly manages dynamically allocated raw resources (e.g., via a raw pointer like int* data;), a compiler-generated copy constructor will perform 
+    a shallow copy (copying only the pointer address, not the data it points to). To avoid issues like two objects pointing to and trying to manage the same heap memory, 
+    a user-defined deep copy constructor is needed (which allocates new memory and copies the content). A user-defined destructor is then essential to release this 
+    heap memory to prevent leaks.
+
+3.  If you provide a user-defined destructor (or copy constructor, or copy assignment operator), the compiler will not automatically generate move 
+    operations (move constructor and move assignment operator). Consequently, even if you use std::move(source_object) to indicate an intention to move, 
+    the compiler will likely fall back to using the copy constructor if available (since a const T& can bind to an rvalue). If the copy constructor performs a 
+    shallow copy (or if it's compiler-generated and thus shallow for raw pointers), you still get a shallow copy. Declaring a move constructor as = default in 
+    a class with raw pointers will also result in a shallow copy for that pointer member (it copies the pointer address but crucially does not nullify 
+    the source object's pointer), leading to potential double deletion. 

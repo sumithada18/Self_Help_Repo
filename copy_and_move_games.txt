@@ -25,3 +25,10 @@
     std::unique_ptr, or other well-behaved class types), then you often do not need to write custom copy/move operations or a custom destructor. The compiler-generated 
     versions will generally do the right thing by invoking the appropriate copy/move/destruct operations on these well-behaved members (this aligns with the "Rule of 
     Zero").
+
+
+   ● Note:
+○ The statement "=default for move operations is bad because it doesn't nullify the source" is true when the member in question is a raw resource handle (like a raw pointer) 
+  for which a "default" member-wise move is just a copy of the handle's value, not a transfer of ownership that includes nullifying the source's handle.
+○ The statement is false if all members are already self-managing (like std::string) or simple types, where their own move operations (or the nature of moving them) are 
+  already correct.

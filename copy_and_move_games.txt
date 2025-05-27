@@ -79,3 +79,55 @@ To move the contents instead, we use str(std::move(other.str)). Here, std::move 
 This distinction matters because std::string, std::vector, and similar types are wrappers around raw data. We can’t "manually" move internal resources — instead, we rely on their move constructors, which are designed to efficiently transfer ownership of dynamic memory or internal buffers.
 
 So, we don’t move the containers directly — we request them to move their contents by explicitly invoking their move constructors using std::move.
+
+=========================================================================================
+    Performance: copy vs move
+=========================================================================================
+**code**:
+#include <iostream>
+#include <vector>
+
+class Heavy {
+public:
+    std::vector<int> data;
+
+    Heavy() {
+        data.resize(1e6, 1);  // Simulate heavy memory usage
+        std::cout << "Constructor\n";
+    }
+
+    Heavy(const Heavy& other) : data(other.data) {
+        std::cout << "Copy Constructor (Expensive)\n";
+    }
+
+    Heavy(Heavy&& other) noexcept : data(std::move(other.data)) {
+        std::cout << "Move Constructor (Cheap)\n";
+    }
+};
+
+int main() {
+    Heavy h1;
+    Heavy h2 = h1;             // Copy: slow
+    Heavy h3 = std::move(h1);  // Move: fast
+    return 0;
+}
+
+🔹 **Understanding**:
+
+* `Heavy` class's constructor initializes a large vector (`1e6` elements) → makes it memory-heavy.
+
+* **Copying** a `Heavy` object:
+
+  * Invokes copy constructor.
+  * Allocates new memory on heap for target's `vector`.
+  * Copies each element one-by-one (deep copy).
+  * **Slow & expensive.**
+
+* **Moving** a `Heavy` object:
+
+  * Invokes move constructor.
+  * Transfers ownership (internal pointer) of the source's `vector` to the target.
+  * Source's vector is left in a **valid but unspecified state** (typically empty).
+  * Fast & efficient.**
+
+

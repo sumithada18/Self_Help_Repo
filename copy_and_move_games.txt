@@ -15,3 +15,7 @@
     shallow copy (or if it's compiler-generated and thus shallow for raw pointers), you still get a shallow copy. Declaring a move constructor as = default in 
     a class with raw pointers will also result in a shallow copy for that pointer member (it copies the pointer address but crucially does not nullify 
     the source object's pointer), leading to potential double deletion. 
+
+4.  To achieve true and safe move semantics for classes managing raw dynamically allocated resources, you must provide a user-defined move constructor (and move assignment       operator). The key responsibility of this custom move constructor is to "steal" the resource (e.g., copy the pointer value to the new object) and then modify the source      object to release its ownership of that resource (e.g., by setting its pointer to nullptr). This leaves the moved-from object in a valid, destructible (and usually           empty) state.
+
+5.  If a class is composed only of members that are themselves properly movable and manage their own resources correctly (like RAII types such as std::string, std::vector,       std::unique_ptr, or other well-behaved class types), then you often do not need to write custom copy/move operations or a custom destructor. The compiler-generated           versions will generally do the right thing by invoking the appropriate copy/move/destruct operations on these well-behaved members (this aligns with the "Rule of             Zero").

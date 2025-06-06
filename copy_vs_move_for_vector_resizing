@@ -1,0 +1,34 @@
+Accurate Understanding:
+When a std::vector (or similar container) resizes, its primary goal is to maintain strong exception safety for itself. This means if anything goes wrong 
+during the resize, the vector should either complete the resize successfully or be left in its original, valid state.
+Here's how it decides:
+
+Copying:
+ - When an element is copied, the original element is not changed.
+ - If the copy constructor throws, the vector can discard the new memory it was trying to fill, and the original vector (with its untouched original elements) 
+   is still perfectly valid.
+ - So, using copy constructors generally makes it easier for the vector to guarantee its own strong exception safety.
+
+Moving (without noexcept):
+ - When an element is moved, the original element is changed (it's "moved-from").
+ => If a move constructor can throw (i.e., it's not noexcept):
+   - Imagine the vector is moving elements. If one move operation throws, some original elements are already moved-from (and changed), and some are not. 
+     The vector is now in a messy, potentially inconsistent state. It's very difficult to roll back to the exact original state.
+   - Because of this risk to its own integrity, if a type's move constructor can throw, std::vector will often choose to use the copy constructor 
+     instead (if available) to ensure it can maintain its strong exception safety, even if copying is slower.
+
+Moving (with noexcept):
+=> If a type's move constructor is noexcept:
+   - The vector knows that moving an element will not, by itself, cause an exception.
+   - This allows the vector to safely use the fast move operations. If an unrelated issue occurs (like failure to allocate the new, larger memory block, which 
+     happens before any elements are moved), that's a different problem, but the act of moving an element won't disrupt the vector's state in a way that prevents
+     a rollback (or ensures completion).
+   - The vector can achieve both better performance (by moving) and maintain its strong exception safety guarantee.
+
+In short:
+std::vector prioritizes its own strong exception safety.
+ - If move operations are noexcept, the vector will happily use them for better performance because they are safe for the vector's integrity.
+ - If move operations can throw (are not noexcept), the vector may fall back to using copy operations (if available) because copying is generally
+   safer for maintaining the vector's strong exception safety, even if it's slower.
+
+You must make your move operations noexcept if they indeed don't throw, to allow containers like std::vector to choose the most efficient and safe path.

@@ -44,3 +44,49 @@ std::function is a versatile, type-safe class template in C++ (often referred to
 
 *   **As Return Types (Less Common, but Possible):**
     *   A function can return a `std::function` if it needs to generate or select a callable at runtime.
+
+
+
+Use Case: Task Queue – schedule different tasks dynamically
+#include <iostream>
+#include <queue>
+#include <functional>
+
+class TaskQueue {
+    std::queue<std::function<void()>> tasks;
+
+public:
+    void addTask(std::function<void()> task) {
+        tasks.push(task);
+    }
+
+    void runAll() {
+        while (!tasks.empty()) {
+            tasks.front()();  // execute task
+            tasks.pop();
+        }
+    }
+};
+
+// Simulated tasks
+void sendEmail() { std::cout << "Email sent!\n"; }
+
+struct NotifyAdmin {
+    void operator()() const {
+        std::cout << "Admin notified!\n";
+    }
+};
+
+int main() {
+    TaskQueue queue;
+
+    queue.addTask(sendEmail);                      // function
+    queue.addTask([] { std::cout << "Report generated.\n"; }); // lambda
+    queue.addTask([] { std::cout << "File uploaded.\n"; });
+    queue.addTask(NotifyAdmin{});
+
+    queue.runAll();  // simulate processing jobs
+
+    return 0;
+}
+

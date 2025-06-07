@@ -1,0 +1,66 @@
+Okay, here's a comparison table for function pointers, functors, and lambdas, focusing on their characteristics and best use cases:
+
+Feature	                          Function Pointer	                  Functor (Function Object)	                      Lambda Expression (C++11+)
+What is it?	        Pointer to a function's address        	An object of a class that overloads operator()	        Anonymous, inline function
+
+Stateful?          	No (cannot easily hold state)	        Yes (can have member variables)	                          Yes (can capture variables by value or reference)
+
+Syntax	            ret_type (*name)(args)              	class MyFunctor { ret_type operator()(args) {...} };	  [captures](args) -> ret_type {body}
+
+Inline-ability	    Less likely to be inlined by 	        Good, like any normal method call	                         Excellent, often inlined easily
+                    compiler (due to indirection)
+Type Safety	        Signature must match, but less C++   	Strong (it's a class)	                                   Strong (compiler generates a unique type)
+                    "type system" integration
+Ease of Use      	Can be verbose, typedef helps          	Requires defining a class	                                Often very concise for simple tasks
+
+Flexibility      	Limited (just calls a function)	        High (full class capabilities)	                          High (captures, can be generic)
+
+Overhead	        Minimal (pointer dereference)	          Similar to a normal method call                          	Can be very low, often no overhead vs. handwritten code
+
+Compatibility	      Excellent with C APIs	                C++ only	                                                  C++11 onwards only
+
+
+When to Use What / Best Use Cases:
+
+Scenario / Use Case	                Best Choice(s)	                           Why?	                                        When Not to Use (or less ideal)
+Interfacing with C                 Function Pointer	                      C understands function                	      Functors, Lambdas (directly)
+APIs / Callbacks to                                                       pointers directly.
+C code	 
+
+Simple, stateless callback         Lambda(if C++11+), 	                  Lambdas are concise.                          Function pointers are simple if no state needed.	Functor (might be overkill)
+needed quickly	                   Function Pointer
+
+Callback needing to 	             Functor, Lambda (with captures)        Functors have members,	                      Function Pointer (needs workarounds like void* context)
+maintain state                                                            Lambdas can capture.
+
+Defining a "strategy" or           Functor	                              Natural fit for                               Function Pointer
+behavior with state                                                       encapsulating behavior + data.
+
+Passing custom comparison 	       Lambda, Functor                     	  Lambdas are often most convenient.            Functors are also good.	Function Pointer (can be done, but more verbose)
+to std::sort, etc.
+
+Short, one-off operations          Lambda	                                Designed for this; 	                          Functor (class definition overhead), Function Pointer
+inline (e.g., in algorithms)	     highly readable and concise.
+
+Need to be stored 	               All three (Lambdas &	                  std::function can wrap any callable.                	-
+in std::function                   Functors are most common)
+
+Creating a family of related, 	   Functor 	                              Class structure allows for this.	            Lambda (less structured for families), Function Pointer
+stateful operations                (potentially with inheritance)
+
+Maximal performance for            Lambda, Functor	                      Compilers are often very                       Function Pointer (indirection might hinder inlining)
+a tiny operation where                                                    good at inlining these.
+inlining is critical	
+
+Pre-C++11 code where 	              Functor	                              Lambdas weren't available.	                   Lambda
+stateful callables are 
+needed
+
+In Simple Terms - Which is "Best"?
+ - For C interop or very simple stateless callbacks: Function Pointers are fine.
+ - For most modern C++ inline callbacks, especially with standard algorithms: Lambdas are often the most convenient, readable, and efficient.
+ - When you need a callable object that explicitly manages significant state or complex logic as part of a well-defined 
+   "behavioral object": Functors provide a clear class-based structure.
+
+The "best" choice depends heavily on the specific context, required C++ version, and whether state needs to be associated with the callable.
+Modern C++ leans heavily towards lambdas for their conciseness and power, with functors still valuable for more structured stateful callables.

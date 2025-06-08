@@ -1,0 +1,8 @@
+1. what are the different header guards ? which ones are traditional and which ones are modern ? 
+2. pitfalls of using constexpr ?
+3. what is rule of 0/3/5 ?
+4. pitfalls/ disadvantages of using std::function ?
+5. what is virtual inheritance ? does vtable and vptr comes into picture in this ?
+6. when using a tuple can be most benefecial ? why do we need a tuple, we can use structs, a struct also can store differnt kinds of values
+7. why do need to make files ? where do files resides in the system ?
+8. 

@@ -171,3 +171,14 @@ After DIP:
    - SMSSender_AfterDIP ---> IMessageSender (implements it)
  - The concrete sender (EmailSender_AfterDIP or SMSSender_AfterDIP) is injected into NotificationService_AfterDIP (typically via the constructor). The high-level module doesn't control which concrete implementation is used; that decision is made externally.
  -   This "inverts" the dependency: the low-level details depend on the abstraction defined by/for the high-level module.
+
+
+
+ Simplified Recap:
+ - High-Level: The "what to do" (e.g., "I need to notify a user").
+ - Low-Level: The "how to do it" (e.g., "Send an email using GMail's API," or "Send an SMS via Twilio").
+ - Abstraction: A common contract (e.g., an INotifier interface with a send(message) method).
+DIP:
+ - The High-Level module uses the INotifier abstraction.
+ - The Low-Level "GMailNotifier" and "TwilioNotifier" implement the INotifier abstraction.
+ - Dependency Injection: Some other part of your system decides whether the GMailNotifier or TwilioNotifier gets given to (injected into) the High-Level module when it needs an INotifier.

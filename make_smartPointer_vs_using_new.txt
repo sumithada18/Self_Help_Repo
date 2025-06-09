@@ -1,0 +1,33 @@
+Uisng `make_shared` vs using `new`
+std::shared_ptr<T> sptr(new T()); (Using new)
+Internals:
+  - new T(): Allocates memory for T on the heap (1st allocation).
+  - shared_ptr constructor: Allocates memory for the control block on the heap (2nd allocation).
+Problem (Exception Safety Leak):
+  - In expressions like function_call(std::shared_ptr<T>(new T()), other_operation()), if other_operation() throws an exception after new T() but before the shared_ptr takes full ownership, the memory for T is leaked.
+  - Performance: Two separate heap allocations can be slower than one.
+
+auto sptr = std::make_shared<T>(); (Using make_shared)
+Internals:
+  - Performs one single heap allocation that is large enough to hold both the T object and its control block contiguously.
+Benefit (Exception Safety):
+  - Avoids the leak scenario above. The creation of the object and the shared_ptr taking ownership (including its control block) are more "atomic" with respect to other potentially throwing operations in an expression.
+Benefit (Performance):
+  - One heap allocation is generally faster and can offer better memory locality than two.
+
+
+std::unique_ptr doesn't have a control block, so std::make_unique doesn't offer the "single allocation for object + control block" performance 
+benefit that std::make_shared does.
+However, std::make_unique is still very useful and highly recommended for std::unique_ptr for these key reasons:
+=> Exception Safety (Same as make_shared):
+This is the primary benefit and it's just as important for unique_ptr as it is for shared_ptr. The problematic expression:
+//---------------------------- code ------------------------------------
+process_data(std::unique_ptr<Widget>(new Widget()), calculate_priority());
+//----------------------------------------------------------------------
+suffers from the exact same potential memory leak if calculate_priority() throws after new Widget() but before the std::unique_ptr constructor fully takes ownership.
+
+std::make_unique solves this:
+//---------------------------- code ------------------------------------
+process_data(std::make_unique<Widget>(), calculate_priority());
+//----------------------------------------------------------------------
+Here, std::make_unique<Widget>() creates and takes ownership of the Widget in a way that isn't vulnerable to an intervening exception from calculate_priority().

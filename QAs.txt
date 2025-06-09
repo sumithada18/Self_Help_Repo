@@ -1,0 +1,38 @@
+C File Handling: Interview Q&A
+
+Question 1: Where are files typically stored, and how does this relate to a C program's memory?
+Answer: Files are stored on a non-volatile or "permanent" storage device, like a hard disk drive (HDD) or a solid-state drive (SSD). This is fundamentally different from a program's 
+main memory (RAM), which is volatile—meaning its contents are lost when the power is turned off. The file on the disk persists, while the program's data in RAM is temporary.
+
+Question 2: Can you explain the difference between a file's "address" on disk and a memory address, for instance, one returned by malloc?
+Answer: They are completely different concepts.
+A memory address (like one from malloc) is a direct, numerical location in your computer's RAM. Your program's pointers hold these addresses to directly access data during execution.
+A file's "address" is not a single number but a path, like C:\Users\Me\document.txt. This path is interpreted by the Operating System's file system, which then translates it into physical 
+locations on the disk. It's an abstraction; your program doesn't know or care about the physical disk sectors.
+
+Question 3: Could you walk me through what happens internally when we call fopen and assign its result to a FILE* pointer?
+Answer: When you call fopen, a few key things happen in sequence:
+Request to OS: Your program makes a "system call," asking the Operating System to access the file.
+OS Takes Over: The OS finds the file on the disk, checks if you have the right permissions (read, write, etc.), and if everything is okay, it prepares an access channel 
+and gives back a low-level identifier, often called a file descriptor.
+Memory Allocation: Back in your program, the C library function fopen dynamically allocates memory on the heap for a special FILE structure.
+Structure Population: It then fills this FILE structure with important management information, including the file descriptor from the OS, a buffer to make reading/writing efficient, 
+flags for errors, and the current position in the file.
+Return Pointer: Finally, fopen returns the address of this FILE structure to you, which you store in your FILE* pointer.
+
+Question 4: Does fopen use malloc internally? And by extension, does fclose use free?
+Answer: Yes, that's an excellent way to conceptualize it.
+fopen needs to create that FILE management structure in your program's memory. To do this, it must request memory from the heap, so it internally uses a function like malloc or calloc.
+fclose has two primary jobs: first, to tell the OS you're done with the file (which ensures any buffered data is written to disk), and second, to clean up. This cleanup
+includes releasing the memory that was allocated for the FILE structure, so it internally calls a function like free to prevent a memory leak.
+
+Question 5: When we have a FILE* fp pointer, what is it actually pointing to? Is it pointing to the data on the disk directly?
+Answer: It does not point directly to the disk. It points to that FILE structure that was created in your program's RAM (on the heap).
+Think of the FILE structure as a "middleman" or a remote control. It holds all the necessary information to manage the connection to the file, but it is not the file itself.
+When you call functions like fread or fwrite and pass them your FILE* pointer, those functions use the information inside that structure to interact with the operating system and perform the actual I/O on the disk.
+
+Question 6: If a file doesn't exist and we open it with a mode like "w" (write), it gets created. Where is this new file created—in memory or somewhere else?
+Answer: The file itself is created directly on the disk. The concept of "creating a file" is purely an operation on the permanent storage.
+When you call fopen("newfile.txt", "w"), your program asks the Operating System to create a file with that name. The OS's file system then updates its records on the disk, making an 
+entry for newfile.txt in the current directory. This is why you can immediately see the 0-byte file appear in your file explorer—you are viewing the state of the disk, which the OS has 
+just modified at your program's request.

@@ -1,0 +1,20 @@
+=> What it is: Copying/assigning a derived class object to a base class object by value, causing the derived-specific parts to be "sliced off."
+=> Result of Slicing: You get a new, pure base class object containing only the base class members from the original derived object.
+=> Pitfall 1: Loss of Derived Class Data: Data members unique to the derived class are gone from the new sliced base object.
+=> Pitfall 2: Loss of Polymorphic Behavior: If the base has virtual functions, the sliced base object will call the base version, not the derived override, 
+   because its type information is now purely "base."
+=> Pointer/Reference vs. Slicing:
+  - Base* ptr = &derived_obj; (or Base& ref = derived_obj;): No slicing. ptr/ref points/refers to the original, complete Derived object. Derived data is still there.
+  - Polymorphism works through these pointers/references if virtual functions are used.
+  - Direct access to derived-only members through ptr/ref is disallowed by static typing (compiler only sees Base), but the members still exist in the object 
+    ptr/ref targets.
+=> Why Slicing Loses Derived Members: The new base object only has memory allocated for base class members. There's no place for the derived parts.
+=> Why Slicing Loses Polymorphism: The new sliced object is a base type; its internal type information (vptr) points to the base class's vtable.
+=> Accessibility (No virtual):
+  - Base object (even if sliced from derived): Cannot access derived-only members (they are gone or never existed in a pure base).
+  - Base pointer/reference to derived: Cannot directly access derived-only members (compiler restricts by static type), but those members do exist in the full 
+    derived object it points/refers to.
+=> Key Distinction: Slicing creates a new, smaller object with data loss. Pointers/references allow interaction with a complete existing object through a 
+    restricted (base type) interface.
+=> How to Avoid: Use base class pointers or references instead of passing/assigning derived objects by value to base class types. Smart 
+    pointers (std::unique_ptr, std::shared_ptr) are preferred for managing heap-allocated polymorphic objects.

@@ -56,4 +56,85 @@ y = y + 1; // Undefined behavior — compiler error or weird output
 //==========================================================================================
 
 
+*Float and Double*
+
+1. The Core Idea: Representing Fractional Numbers
+The primary job of float and double is to store numbers that have a fractional part, like 3.14159 or -0.0025. Integers (int, char) can only store whole numbers.
+
+A quick but vital point: There is no unsigned float or unsigned double. Floating-point numbers are always signed by definition.
+
+2. Internal Storage: The "Scientific Notation" Blueprint
+Computers store float and double using a standard called IEEE 754. The easiest way to understand this is to think of scientific notation.
+
+Any number can be written as: Sign x Digits x 10^Exponent (e.g., - 6.022 x 10^23)
+
+IEEE 754 stores numbers in a very similar binary format, splitting the bits into three parts:
+
+1. Sign (1 bit): The simplest part. 0 for positive, 1 for negative.
+2. Exponent (several bits): This determines the range of the number—how large or small it can be. It's like the ^23 part, controlling where the decimal point goes.
+3. Mantissa / Fraction (the rest of the bits): This stores the actual digits of the number. It determines the precision.
+
+The only real difference between float and double is how many bits they dedicate to the Exponent and Mantissa.
+
+Feature     	    float (Single Precision)	      double (Double Precision)
+Total Size	       4 bytes (32 bits)	            8 bytes (64 bits)
+Sign Bits	        1 bit	                        1 bit
+Exponent Bits	    8 bits	                       11 bits
+Mantissa Bits	    23 bits	                      52 bits
+
+
+3. What is Precision? (The Most Important Difference)
+Precision simply means: "How many significant decimal digits can you trust?"
+
+Because a double has more than twice the bits for its mantissa (52 vs. 23), it can store a number with far more accuracy.
+
+Example: Storing the value of Pi.
+-> A float might store it as 3.141592. You can only trust about 7 digits. The rest is lost.
+-> A double can store it as 3.141592653589793. You can trust about 15-16 digits.
+
+Rule of thumb for an intelligent developer: Always use double by default. Use float only when you have a very specific reason, such as:
+-> You have a massive array with millions of numbers and memory usage is critical (common in graphics programming).
+-> You are on hardware that has poor double performance.
+
+4. Special Behaviors and "Overflow"
+Floating-point numbers do not wrap around or cause Undefined Behavior like integers. They have their own special states for handling exceptional situations.
+
+Overflow: If a number is too large to represent, it becomes Infinity (inf).
+//==========================================================================================
+double huge_num = 1.0e308;
+huge_num = huge_num * 10; // Becomes 'inf'
+std::cout << huge_num;    // Prints "inf"
+//==========================================================================================
+
+Division by Zero: This also results in Infinity.
+//==========================================================================================
+double result = 1.0 / 0.0; // result is 'inf'
+//==========================================================================================
+
+Invalid Operations: An operation with no valid mathematical answer results in Not a Number (NaN).
+//==========================================================================================
+double result1 = 0.0 / 0.0;        // result1 is 'nan'
+double result2 = sqrt(-1.0);     // result2 is 'nan'
+//==========================================================================================
+
+5. The Golden Rule: Never Compare Floats with ==
+Because of small precision errors, a number you think is 0.3 might actually be stored as 0.30000000000000004. Comparing it directly will fail.
+
+BAD:
+//==========================================================================================
+double x = 0.1 + 0.2;
+if (x == 0.3) { /* This will probably be FALSE! */ }
+//==========================================================================================
+
+GOOD:
+Check if the numbers are "close enough."
+//==========================================================================================
+const double EPSILON = 0.000001;
+if (std::abs(x - 0.3) < EPSILON) { /* This is TRUE */ }
+//==========================================================================================
+
+=> long double
+There is also a long double type, which is platform-dependent but offers even more precision than a double (often 10 or 16 bytes). It's rarely used unless extreme numerical precision is required (e.g., in scientific or financial modeling).
+
+
 

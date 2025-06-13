@@ -1,0 +1,41 @@
+Core Concept
+-> Linkage decides if a variable or function name is visible to the linker across different .cpp files.
+
+External Linkage ("Public")
+ -> Rule: The name is public to the linker. The whole program can see it.
+ -> Consequence: You must have exactly one definition in the entire program.
+    - 0 definitions -> "Unresolved external symbol" linker error.
+    - 2+ definitions -> "Multiple definition" linker error.
+
+What has External Linkage by default:
+ - Global variables: int g_score;
+ - Functions: void print_score();
+ - Class static members: static int Player::playerCount; (This is the confusing one!)
+ - Variables declared with extern: extern int g_health;
+
+Internal Linkage ("Private")
+ - Rule: The name is hidden from the linker. It's private to its own .cpp file.
+ - Consequence: The linker never sees a conflict. Each .cpp file that includes it gets its own separate, independent copy.
+
+What has Internal Linkage:
+ - Global variables/functions declared with static: static int g_private_counter;
+ - Global const variables: const double PI = 3.14; (By default, const globals are internal).
+ - Anything in an anonymous namespace: namespace { int my_secret_var; }
+
+Summary "Cheat Sheet"
+//=============================================================================================
+Declaration                   	Linkage            	What it means for the Linker
+//=============================================================================================
+int g_var; (Global)           	External	      Public. Must be defined exactly once.
+
+static int g_var; (Global)  	 Internal	        Private. Invisible to the linker.
+
+void func();                 	 External	        Public. Must be defined exactly once.
+
+class C { static             	 External	        Public. static here means "one for the class."
+int m_var; };
+
+const int G_CONST = 10; 	     Internal	        Private. Invisible to the linker.
+(Global)
+
+extern int g_var;	             External	        A public promise that a definition exists elsewhere.

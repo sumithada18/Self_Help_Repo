@@ -90,9 +90,11 @@ Stage 2: Compilation (Proper)
       - Name Resolution: Figures out exactly which variable or function is being referred to, especially with scopes and namespaces.
       - If there are semantic errors (e.g., type mismatch, using an undeclared variable), they are reported here.
 
-D. Optimization (Optional but Standard):
-- The compiler analyzes the code (often represented internally in a form like the AST or a "three-address code") and applies   various transformations to make it run faster or use less memory, without changing its observable behavior.
-- Examples: Inlining functions, loop unrolling, constant folding (calculating 2+3 at compile time), dead code elimination      (removing code that never executes). The level of optimization is usually controlled by compiler flags (e.g., -O0, -O2, -    Os).
+   D. Optimization (Optional but Standard):
+      - The compiler analyzes the code (often represented internally in a form like the AST or a "three-address code") and           applies various transformations to make it run faster or use less memory, without changing its observable behavior.
+      - Examples: Inlining functions, loop unrolling, constant folding (calculating 2+3 at compile time), dead code 
+        elimination(removing code that never executes). The level of optimization is usually controlled by compiler flags 
+         (e.g., -O0, -O2, -Os).
 
    E. Code Generation:
       - The compiler translates the (optimized) intermediate representation of your program into assembly language specific          to the target CPU architecture (e.g., x86-64, ARM). Assembly language is a low-level, human-readable representation          of machine instructions.

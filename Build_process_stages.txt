@@ -1,0 +1,44 @@
+Q1: What are the fundamental stages of the build process common to both C and C++?
+A: Both C and C++ typically go through these core stages:
+1. Preprocessing: Handles directives like #include, #define, and conditional compilation (#ifdef).
+2. Compilation: Translates the preprocessed source code into assembly language and then into machine-readable 
+   object code (usually .o or .obj files).
+3. Linking: Combines one or more object files (from your code and libraries) into a single executable program, 
+   resolving symbol references between them.
+
+Q2: Is the build process exactly the same for C and C++?
+A: No, not exactly. While the core stages are the same, the C++ build process involves additional steps or 
+   complexities due to C++ specific language features.
+
+
+Q3: What specific tasks does the C++ compiler/linker handle that a C compiler/linker typically doesn't (or does 
+    much more simply)?
+A:
+* Name Mangling: The C++ compiler modifies function and variable names in the object code to encode information 
+  about their parameters (for function overloading) and namespaces. C has simpler or no name mangling.
+* Template Instantiation: C++ templates require the compiler (and sometimes the linker) to generate actual code 
+  for specific template instantiations used in the program. C does not have templates.
+* Exception Handling: C++ has built-in exception handling (try, catch, throw). The compiler generates extra information 
+  and code (like unwind tables) to support this, and the linker links against runtime support libraries for exceptions.
+  C generally relies on error codes or setjmp/longjmp.
+* Runtime Type Information (RTTI): Features like dynamic_cast and typeid in C++ require the compiler to store type 
+  information with objects and the linker to support this. C does not have RTTI.
+* Constructor/Destructor Calls for Global/Static Objects: C++ has more complex rules and mechanisms for ensuring 
+  constructors of global/static objects are called before main() and destructors are called after main() exits (or 
+  at program termination).
+* Virtual Table (vtable) Generation: For classes with virtual functions, the C++ compiler generates vtables, and 
+  object instances contain vpointers to support runtime polymorphism.
+
+
+Q4: So, if I use a C++ compiler to compile C code, what happens?
+A: Most C++ compilers can also compile C code (often by detecting the file extension like .c or via a compiler flag). 
+   When compiling C code, the C++ compiler will generally:
+* Adhere to C standards (though there can be subtle differences if not explicitly told which C standard to use).
+* Not perform C++ specific operations like complex name mangling or template instantiation on pure C code.
+* The linking stage would be simpler, linking against C standard libraries.
+
+
+Q5: In essence, what's the simplest way to summarize the difference?
+A: The fundamental build flow (preprocess, compile, link) is the same. However, the C++ compiler and linker have a 
+   significantly more complex job due to the richer set of language features in C++ that require special handling 
+   during compilation and linking.

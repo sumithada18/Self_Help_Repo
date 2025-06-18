@@ -15,6 +15,11 @@ public:
 		static Singleton instance;
 		return instance;
 	}
+
+// Delete copy constructor and copy assignment operator
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
 	void show() {
 		std::cout << data << "\n";
 	}

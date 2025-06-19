@@ -1,7 +1,10 @@
 ISP:
-The Interface Segregation Principle (ISP) states that clients should not be forced to depend on interfaces (or methods) they do not use.
+The Interface Segregation Principle (ISP) states that clients should not be forced to depend on interfaces (or methods)
+they do not use.
 
-In simpler terms, it's better to have many small, specific interfaces tailored to particular client needs rather than one large, general-purpose ("fat") interface that tries to do everything. If a class implements an interface, it shouldn't be forced to implement methods it doesn't actually need or use.
+In simpler terms, it's better to have many small, specific interfaces tailored to particular client needs rather than
+one large, general-purpose ("fat") interface that tries to do everything. If a class implements an interface, it 
+shouldn't be forced to implement methods it doesn't actually need or use.
 
 => Problem it Solves:
 - ISP addresses the issues that arise from "fat" interfaces:
